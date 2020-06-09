@@ -1,18 +1,15 @@
 package solcolator.luwak;
 
 import java.util.List;
-
-import uk.co.flax.luwak.QueryError;
+import java.io.IOException;
 
 public class LuwakUpdateException {
-	public static String getPrintableErrorString(List<QueryError> errors) {
+	public static String getPrintableErrorString(List<IOException> errors) {
 		StringBuilder printableString = new StringBuilder("\r\n");
 		
-		for (QueryError error : errors) {
-			printableString.append("\r\nQuery: ");
-			printableString.append(error.query);
+		for (IOException error : errors) {
 			printableString.append("\r\nError: ");
-			printableString.append(error.error);
+			printableString.append(error.getMessage());
 			printableString.append("\r\n");
 		}
 

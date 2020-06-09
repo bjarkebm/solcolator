@@ -27,7 +27,6 @@ public class SolcolatorRequestHandler extends SearchHandler {
 		return "Enpoint for update solcolator queries";
 	}
 
-	@Override
 	public String getSource() {
 		return "SOLR4189 production";
 	}

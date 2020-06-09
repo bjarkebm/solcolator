@@ -5,19 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.monitor.Monitor;
+import org.apache.lucene.monitor.Presearcher;
 import org.apache.solr.core.SolrCore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import solcolator.io.api.IQueryReader;
 import solcolator.io.api.ISolcolatorResultsWriter;
 import solcolator.io.api.SolcolatorQuery;
-import solcolator.io.api.IQueryReader;
-import uk.co.flax.luwak.Monitor;
-import uk.co.flax.luwak.MonitorQueryParser;
-import uk.co.flax.luwak.Presearcher;
-import uk.co.flax.luwak.UpdateException;
-import uk.co.flax.luwak.presearcher.MatchAllPresearcher;
-
 /**
  * The class is responsible for managing (add/update/delete) queries
  */
@@ -31,7 +28,6 @@ public class LuwakQueriesManager implements AutoCloseable {
 	private Map<String,LuwakQuery> queryIdToLuwakQuery;
 	private IQueryReader reader;
 	private List<ISolcolatorResultsWriter> writers;
-	private List<String> componentsToParser;
 		
 	public static LuwakQueriesManager getQueriesManager() {
 		return manager;
@@ -41,12 +37,11 @@ public class LuwakQueriesManager implements AutoCloseable {
 	/**
 	 * Initializing mappings (queryIdToSolrQuery)
 	 */
- 	public void init(IQueryReader reader, List<ISolcolatorResultsWriter> writers, List<String> componentsToParser) {
+ 	public void init(IQueryReader reader, List<ISolcolatorResultsWriter> writers) {
 		queryIdToLuwakQuery = new HashMap<>();
 		
 		this.reader = reader;
 		this.writers = writers;
-		this.componentsToParser = componentsToParser;
 		
 		log.info("LuwakQueriesManager was initialized successfully");
 	}
@@ -57,11 +52,10 @@ public class LuwakQueriesManager implements AutoCloseable {
 	 * @throws ExceptionInInitializerError
 	 */
 	public void createMonitor(SolrCore core) throws ExceptionInInitializerError {
-		MonitorQueryParser parser = new LuwakParser(core, componentsToParser);
-		Presearcher presearcher = new MatchAllPresearcher();
+		Presearcher presearcher = Presearcher.NO_FILTERING;
 		
 		try {
-			monitor = new Monitor(parser, presearcher);
+			monitor = new Monitor(new StandardAnalyzer(), presearcher);
 		} catch (IOException e) {
 			log.error("Failed to create Monitor", e);
 			
@@ -155,7 +149,7 @@ public class LuwakQueriesManager implements AutoCloseable {
 			long startTime = System.currentTimeMillis();
 			queryIdToLuwakQuery.forEach((queryId, query) -> {
 				try {
-					monitor.update(query);												// add/update query in monitor
+					monitor.register(query);												// add/update query in monitor
 				} catch (Exception e) {
 					log.error(String.format("Query %s is failed to update", queryId), e);
 				}
@@ -174,9 +168,9 @@ public class LuwakQueriesManager implements AutoCloseable {
 			String queryId = monitorQuery.getId();
 			
 			try {
-				monitor.update(monitorQuery);												// add/update query in monitor
-			} catch (UpdateException e) {
-				String errMessage = String.format("Failed to load query with id %s due to %s", monitorQuery.getId(), LuwakUpdateException.getPrintableErrorString(e.errors));
+				monitor.register(monitorQuery);												// add/update query in monitor
+			} catch (IOException e) {
+				String errMessage = String.format("Failed to load query with id %s due to %s", monitorQuery.getId(), e.getMessage());
 				log.error(errMessage);
 				
 				throw new Exception(errMessage);

@@ -2,7 +2,7 @@ package solcolator.luwak;
 
 import java.util.Map;
 
-import uk.co.flax.luwak.MonitorQuery;
+import org.apache.lucene.monitor.MonitorQuery;
 
 /**
  * The class represents json serializable LUWAK query
@@ -11,7 +11,7 @@ public class LuwakQuery extends MonitorQuery {
 	private final String queryName;
 	
 	public LuwakQuery(String id, String queryName, String query, Map<String, String> queryMetadata) {
-		super(id, query, queryMetadata);
+		super(id, null, query, queryMetadata);
 		this.queryName = queryName;
 	}
 	
