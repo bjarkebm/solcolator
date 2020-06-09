@@ -33,7 +33,7 @@ import solcolator.io.api.ISolcolatorResultsWriter;
 		<str name="fileFl">[comma separated list of fields are separated]</str>
 	</lst>
  */
-public class FileWriter implements ISolcolatorResultsWriter, AutoCloseable {
+public class FileWriter implements ISolcolatorResultsWriter {
 	private static final Logger log = LoggerFactory.getLogger(FileWriter.class);
 	private static final String FILE_PATH = "filePath";
 	private static final String FILE_FL = "fileFl";
@@ -42,7 +42,6 @@ public class FileWriter implements ISolcolatorResultsWriter, AutoCloseable {
 	private List<String> fl;
 	private BufferedWriter bw;
 	
-	@Override
 	public void init(NamedList<?> outputConfig) throws IOException {
 		this.fl = Arrays.asList(((String) outputConfig.get(FILE_FL)).split(","));
 		String filePath = (String) outputConfig.get(FILE_PATH);
@@ -59,7 +58,6 @@ public class FileWriter implements ISolcolatorResultsWriter, AutoCloseable {
 		bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath, false), StandardCharsets.UTF_8));
 	}
 	
-	@Override
 	public void writeSolcolatorResults(Map<String, List<SolrInputDocument>> queriesToDocs) {
 		try {
 			bw.append(String.format("%s\n", gson.toJson(queriesToDocs)));
@@ -69,12 +67,10 @@ public class FileWriter implements ISolcolatorResultsWriter, AutoCloseable {
 		}
 	}
 	
-	@Override
 	public List<String> getFl() {
 		return fl;
 	}
 
-	@Override
 	public void close() throws IOException {
 		if (bw != null) {
 			bw.close();

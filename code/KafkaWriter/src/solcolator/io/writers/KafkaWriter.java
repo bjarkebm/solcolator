@@ -48,7 +48,6 @@ public class KafkaWriter implements ISolcolatorResultsWriter {
 	private String topicName;
 	private Producer<String,String> producer;
 	
-	@Override
 	public void init(NamedList<?> outputConfig) throws IOException {
 		this.fl = Arrays.asList(((String) outputConfig.get(KAFKA_FL)).split(","));
 		this.topicName = (String) outputConfig.get(KAFKA_TOPIC);
@@ -64,7 +63,6 @@ public class KafkaWriter implements ISolcolatorResultsWriter {
 		Thread.currentThread().setContextClassLoader(classLoader);
 	}
 
-	@Override
 	public void writeSolcolatorResults(Map<String, List<SolrInputDocument>> queriesToDocs) throws IOException {
 		for (Entry<String, List<SolrInputDocument>> queryToDocs : queriesToDocs.entrySet()) {
 			for (SolrInputDocument doc : queryToDocs.getValue()) {
@@ -85,12 +83,10 @@ public class KafkaWriter implements ISolcolatorResultsWriter {
 		}	
 	}
 	
-	@Override
 	public List<String> getFl() {
 		return fl;
 	}
 
-	@Override
 	public void close() {
 		producer.close();
 	}

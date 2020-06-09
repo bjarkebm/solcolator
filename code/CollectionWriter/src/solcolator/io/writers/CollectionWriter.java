@@ -30,7 +30,7 @@ import solcolator.io.api.ISolcolatorResultsWriter;
 	</lst>
  *
  */
-public class CollectionWriter implements ISolcolatorResultsWriter, AutoCloseable {
+public class CollectionWriter implements ISolcolatorResultsWriter {
 	private static final Logger log = LoggerFactory.getLogger(CollectionWriter.class);
 	private static final String ZOOKEEPERS = "zookeepers";
 	private static final String COLLECTION_NAME = "collectionName";
@@ -39,7 +39,6 @@ public class CollectionWriter implements ISolcolatorResultsWriter, AutoCloseable
 	private List<String> fl;
 	private CloudSolrClient solrClient;
 
-	@Override
 	public void init(NamedList<?> outputConfig) throws IOException {
 		String zookeepers = (String) outputConfig.get(ZOOKEEPERS);
 		String collection = (String) outputConfig.get(COLLECTION_NAME);
@@ -48,7 +47,6 @@ public class CollectionWriter implements ISolcolatorResultsWriter, AutoCloseable
 		this.solrClient.setDefaultCollection(collection);
 	}
 
-	@Override
 	public void writeSolcolatorResults(Map<String, List<SolrInputDocument>> queriesToDocs) throws IOException {
 		for (Entry<String, List<SolrInputDocument>> queryToDocs : queriesToDocs.entrySet()) {
 			try {
@@ -64,12 +62,10 @@ public class CollectionWriter implements ISolcolatorResultsWriter, AutoCloseable
 		}			
 	}
 
-	@Override
 	public List<String> getFl() {
 		return fl;
 	}
 	
-	@Override
 	public void close() throws IOException {
 		solrClient.close();
 	}
