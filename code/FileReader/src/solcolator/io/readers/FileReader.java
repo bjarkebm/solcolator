@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.solr.common.util.NamedList;
@@ -45,7 +46,6 @@ public class FileReader implements IQueryReader {
 	private final Gson gson = new Gson();
 	private File file;
 	
-	@Override
 	public void init(NamedList<?> inputConfig) {
 		String filePath = (String) inputConfig.get(FILE_PATH);	
 		file = new File(filePath);
@@ -55,7 +55,6 @@ public class FileReader implements IQueryReader {
 		}
 	}
 	
-	@Override
 	public List<SolcolatorQuery> readAllQueries(Map<String, String> reqHandlerMetadata) throws IOException {
 		if (file == null) {
 			return new ArrayList<SolcolatorQuery>();
@@ -81,11 +80,11 @@ public class FileReader implements IQueryReader {
 		return solcolatorQueries;
 	}
 	
-	@Override
-	public SolcolatorQuery readByQueryId(String queryId, String queryName, Map<String, String> reqHandlerMetadata) throws IOException {
+	public SolcolatorQuery readByQueryId(final String queryId, String queryName, Map<String, String> reqHandlerMetadata) throws IOException {
 		List<SolcolatorQuery> queries = readAllQueries(reqHandlerMetadata);
 		
-		List<SolcolatorQuery> foundQueries = queries.stream().filter(x -> x.getQueryId().equals(queryId)).collect(Collectors.toList());
+		Supplier<List<SolcolatorQuery>> supplier = () -> new ArrayList<SolcolatorQuery>();
+		List<SolcolatorQuery> foundQueries = queries.stream().filter((SolcolatorQuery x) -> x.getQueryId().equals(queryId)).collect(Collectors.toCollection(supplier));
 		
 		if (foundQueries.isEmpty()) {
 			String errMsg = String.format("Query with id %s wasn't found", queryId);
@@ -108,7 +107,6 @@ public class FileReader implements IQueryReader {
 		public String query;
 	}
 
-	@Override
 	public void close() throws Exception {
 		//Nothing to close
 	}
